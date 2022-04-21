@@ -1,0 +1,3 @@
+﻿1=> Kategori verileri geldiginde her verinin yanına güncelleme ve silme butonları da olusturulsun...BU butonlar arkasında ilgili verilerin unique bilgisini de tutsun...Bu butonlara basılınca ilgili verinin güncelleme ve silme işlemini gerçekleştirsin
+
+2=> Bir Select butonu yaratın 

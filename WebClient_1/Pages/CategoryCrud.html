@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>CategoryCrud</title>
+    <script src="../Scripts/jquery-1.9.0.js"></script>
+    <script src="../Scripts/bootstrap.js"></script>
+    <link href="../Content/bootstrap.css" rel="stylesheet" />
+    <style>
+        .genislik {
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row">
+
+            <div class="col-md-6">
+                ID => <input type="text" class="form-control genislik" id="txtID" placeholder="ID Giriniz" />
+                Name => <input type="text" class="form-control genislik" id="txtName" placeholder="Kategori ismi" />
+                Description => <input type="text" class="form-control genislik" id="txtDesc" placeholder="Aciklama" />
+
+                <hr />
+
+                <input type="button" id="btnAll" class="btn btn-info" value="Kategorileri getir" />
+                <input type="button" id="btnID" class="btn btn-primary" value="Kategori getir" />
+
+                <hr />
+
+                <input type="button" id="btnAdd" class="btn btn-info" value="Kategori Ekle" />
+                <input type="button" id="btnDelete" class="btn btn-danger" value="Kategori sil" />
+                <input type="button" id="btnUpdate" class="btn btn-warning" value="Kategori güncelle" />
+
+                <hr />
+                <input type="text" id="txtSearch" class="form-control genislik" placeholder="Arama yapınız" />
+
+
+            </div>
+
+            <div class="col-md-6">
+
+                <table id="tab1" class="table table-hover">
+                    <tr>
+                        <th>Kategori ID</th>
+                        <th>Kategori Ismi</th>
+                        <th>Kategori Acıklaması</th>
+                    </tr>
+
+
+
+
+
+
+                </table>
+
+
+
+            </div>
+        </div>
+    </div>
+
+    <!--https://localhost:44378/-->
+
+    <script>
+
+        //BU fonksiyonumuz Table'imizdeki ilk tr dısındaki tüm tr'leri temizliyor...
+
+        function ControlHeader() {
+            //Jquery kullanma sembolü $ sembolüdür...Biz bu sembolü kullandıgımız anda Jquery kullandıgımızı belirtiyoruz...
+
+            $("#tab1").find("tr:gt(0)").remove(); //burada tr:gt(0) ifadesi: "Table row must be greater than zero" demektir ki tr'sinin index'i 0'dan büyük olan tüm tr'leri bul ve sil anlamına gelir...
+
+        }
+
+        //Bu fonksiyonumun amacı API'a gittigimiz ve veri aldıgımız zaman o verileri tablomuzun icerisine entegre etmektir...
+
+        function BringDataList(dataList) {
+
+            ControlHeader();
+
+            $.each(dataList, function (key, data) {
+
+                $("#tab1").append("<tr> <td>" + data.ID + " </td> <td> " + data.CategoryName + " </td> <td>" + data.Description + " </td> </tr>");
+
+
+
+            })
+        }
+
+        //Bu fonksiyonun amacı API'dan id'sini istedigimiz ve verisini aldıgımız kategoriyi tablomuzun icerisine entegre etmektir...
+        function BringData(data) {
+            ControlHeader();
+
+            $("#tab1").append("<tr> <td>" + data.ID + " </td> <td> " + data.CategoryName + " </td> <td>" + data.Description + " </td> </tr>");
+        }
+
+        $(function () {
+
+            //Kategorileri listele
+
+            $("#btnAll").click(function () {
+
+                $.ajax({
+
+                    url: "https://localhost:44378/api/Category/ListCategories",
+                    type: "Get",
+                    success: function (data) {
+                        BringDataList(data);
+                    }
+
+                })
+
+
+            })
+
+            //Kategori getir
+
+            $("#btnID").click(function () {
+                $.ajax({
+                    url: "https://localhost:44378/api/Category/BringCategoryByID",//burada dilerseniz data parametresinden Json verisi göndermek yerine URL'e de direkt /$("#txtID").val() yazılabilir...Ama sakın BringCategoryByID'den sonra slash koymayı unutmayın...Ve bir de bu ancak gitmek istedigimiz metodun parametresinin ismi id ise gecerlidir...
+                    data: { id: $("#txtID").val() },
+                    type: "Get",
+                    success: function (data) {
+                        BringData(data);
+                    }
+
+                })
+            })
+
+
+            //Kategori Ekle
+
+            $("#btnAdd").click(function () {
+                $.ajax({
+                    url: "https://localhost:44378/api/Category/AddCategory",
+                    type: "Post",
+                    data: { CategoryName: $("#txtName").val(), Description: $("#txtDesc").val() },
+                    success: function (data) {
+                        BringDataList(data);
+                    }
+                })
+            })
+
+            //Kategori Sil
+
+            //Delete yöntemlerinde Data ile server'a veri gönderemezsiniz...O yüzden mecburi bir şekilde ID verisini URL'den vermeniz gerekir...
+
+            $("#btnDelete").click(function () {
+                $.ajax({
+                    url: "https://localhost:44378/api/Category/DeleteCategory/" + $("#txtID").val(),
+                    type: "Delete",
+                    success: function (data) {
+                        BringDataList(data);
+                    }
+                })
+            })
+
+            //Kategori Güncelleme
+            $("#btnUpdate").click(function () {
+                $.ajax({
+                    url: "https://localhost:44378/api/Category/UpdateCategory",
+                    data: { CategoryID: $("#txtID").val(), CategoryName: $("#txtName").val(), Description: $("#txtDesc").val() },
+                    type: "Put",
+                    success: function (data) {
+                        BringDataList(data);
+                    }
+                })
+            })
+
+
+            //Search Category
+
+            $("#txtSearch").keyup(function () {
+
+                if ($(this).val().trim() == "") {
+                    $.ajax({
+
+                        url: "https://localhost:44378/api/Category/ListCategories",
+                        type: "Get",
+                        success: function (data) {
+                            BringDataList(data);
+                        }
+
+                    })
+                }
+
+                else {
+                    $.ajax({
+                        url: "https://localhost:44378/api/Category/SearchCategory",
+                        data: { item: $(this).val() },
+                        type: "Get",
+                        success: function (data) {
+                            BringDataList(data);
+                        }
+                    })
+                }
+             
+            })
+
+
+        })
+
+
+       
+
+    </script>
+
+
+
+
+
+
+</body>
+</html>
+
+
